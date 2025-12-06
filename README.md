@@ -1,10 +1,10 @@
 # AI Chat Exporter
 
-A minimal web tool to export your AI chat history from Claude and ChatGPT by date.
+A minimal web tool to export your AI chat history from Claude, ChatGPT, and Grok by date.
 
 ## Features
 
-- **Multi-platform support**: Claude and ChatGPT
+- **Multi-platform support**: Claude, ChatGPT, and Grok
 - **Flexible date selection**: Single day, date range, or export all
 - **Content filtering**: Export both sides, user only, or AI only
 - **Multiple formats**: Markdown (.md) or Plain Text (.txt)
@@ -25,11 +25,16 @@ A minimal web tool to export your AI chat history from Claude and ChatGPT by dat
 2. Wait for email, download ZIP
 3. Extract and find `conversations.json`
 
+**Grok:**
+1. Go to x.com → Settings → Download an archive of your data
+2. Wait for email, download ZIP
+3. Extract and find the Grok conversations JSON file
+
 ### Step 2: Use the tool
 
 1. Open `index.html` in your browser (or visit the [live demo](https://yuanxixie.github.io/ai-chat-exporter/))
-2. Select platform (Claude or ChatGPT)
-3. Upload your `conversations.json` file
+2. Select platform (Claude, ChatGPT, or Grok)
+3. Upload your JSON file
 4. Choose date(s) from the calendar
 5. Select what to export (both, user only, or AI only)
 6. Choose format (Markdown or Plain Text)
