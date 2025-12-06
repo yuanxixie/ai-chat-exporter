@@ -66,7 +66,13 @@ function parseLoadedData() {
 function extractDates(data, platform) {
     const dateSet = new Set();
     
-    for (const conversation of data) {
+    // Handle different data structures
+    let conversations = data;
+    if (platform === 'grok' && data.conversations) {
+        conversations = data.conversations;
+    }
+    
+    for (const conversation of conversations) {
         let dateStr;
         
         try {
@@ -77,6 +83,10 @@ function extractDates(data, platform) {
             } else if (platform === 'chatgpt') {
                 if (conversation.create_time) {
                     dateStr = unixToDate(conversation.create_time);
+                }
+            } else if (platform === 'grok') {
+                if (conversation.conversation && conversation.conversation.create_time) {
+                    dateStr = conversation.conversation.create_time.split('T')[0];
                 }
             }
             
@@ -221,6 +231,8 @@ function exportSingleDate(data, platform, senderFilter, format, status) {
         result = processClaudeData(data, dateInput.value, senderFilter);
     } else if (platform === 'chatgpt') {
         result = processChatGPTData(data, dateInput.value, senderFilter);
+    } else if (platform === 'grok') {
+        result = processGrokData(data, dateInput.value, senderFilter);
     }
     
     if (result.length === 0) {
@@ -267,6 +279,8 @@ function exportDateRange(data, platform, senderFilter, format, status) {
             result = processClaudeData(data, date, senderFilter);
         } else if (platform === 'chatgpt') {
             result = processChatGPTData(data, date, senderFilter);
+        } else if (platform === 'grok') {
+            result = processGrokData(data, date, senderFilter);
         }
         
         if (result.length > 0) {
@@ -295,6 +309,8 @@ function exportAllDates(data, platform, senderFilter, format, status) {
             result = processClaudeData(data, date, senderFilter);
         } else if (platform === 'chatgpt') {
             result = processChatGPTData(data, date, senderFilter);
+        } else if (platform === 'grok') {
+            result = processGrokData(data, date, senderFilter);
         }
         
         if (result.length > 0) {
@@ -337,11 +353,9 @@ function processClaudeData(data, targetDate, senderFilter) {
 
             if (content) {
                 if (senderFilter === 'both') {
-                    // Export both: label sender
                     const senderLabel = message.sender === 'human' ? 'Me' : 'Claude';
                     output.push(`**${senderLabel}:**\n${content}\n`);
                 } else {
-                    // Export single: separate with horizontal rule
                     if (messageCount > 0) {
                         output.push('---\n');
                     }
@@ -407,16 +421,70 @@ function processChatGPTData(data, targetDate, senderFilter) {
         let messageCount = 0;
         for (const msg of messages) {
             if (senderFilter === 'both') {
-                // Export both: label sender
                 const senderLabel = msg.role === 'user' ? 'Me' : 'ChatGPT';
                 output.push(`**${senderLabel}:**\n${msg.content}\n`);
             } else {
-                // Export single: separate with horizontal rule
                 if (messageCount > 0) {
                     output.push('---\n');
                 }
                 output.push(`${msg.content}\n`);
                 messageCount++;
+            }
+        }
+
+        output.push('\n---\n');
+    }
+
+    return output.join('\n');
+}
+
+// ========== Grok Parser ==========
+
+function processGrokData(data, targetDate, senderFilter) {
+    let output = [];
+    
+    output.push(`# ${targetDate}\n`);
+
+    // Grok's structure: { conversations: [...] }
+    const conversations = data.conversations || [];
+
+    for (const item of conversations) {
+        const conversation = item.conversation;
+        if (!conversation || !conversation.create_time) continue;
+        
+        const convDate = conversation.create_time.split('T')[0];
+
+        if (convDate !== targetDate) {
+            continue;
+        }
+
+        output.push(`## ${conversation.title || 'Untitled'}\n`);
+
+        const responses = item.responses || [];
+        
+        let messageCount = 0;
+        for (const resp of responses) {
+            const response = resp.response;
+            if (!response) continue;
+            
+            const sender = response.sender;
+            const content = response.message || '';
+            
+            // Filter by sender
+            if (senderFilter === 'human' && sender !== 'human') continue;
+            if (senderFilter === 'assistant' && sender !== 'assistant') continue;
+            
+            if (content && content.trim()) {
+                if (senderFilter === 'both') {
+                    const senderLabel = sender === 'human' ? 'Me' : 'Grok';
+                    output.push(`**${senderLabel}:**\n${content}\n`);
+                } else {
+                    if (messageCount > 0) {
+                        output.push('---\n');
+                    }
+                    output.push(`${content}\n`);
+                    messageCount++;
+                }
             }
         }
 
