@@ -292,37 +292,52 @@
     </div>
 
     <div class="step">
-        <div class="step-title">3. Date</div>
-        <div style="margin-bottom: 12px;">
-            <label>
-                <input type="radio" name="dateMode" value="single" checked onchange="toggleDateMode()"> Single
-            </label>
-            <label style="margin-left: 16px;">
-                <input type="radio" name="dateMode" value="range" onchange="toggleDateMode()"> Range
-            </label>
-            <label style="margin-left: 16px;">
-                <input type="radio" name="dateMode" value="all" onchange="toggleDateMode()"> Export All
-            </label>
-        </div>
-        <div id="singleDatePicker">
-            <input type="date" id="dateInput">
-            <div class="calendar-container" id="calendarContainer">
-                <div class="calendar-header">
-                    <button onclick="changeMonth(-1)">Prev</button>
-                    <span class="calendar-month" id="calendarMonth"></span>
-                    <button onclick="changeMonth(1)">Next</button>
-                </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-                <div class="calendar-stats" id="calendarStats"></div>
+    <div class="step-title">3. Date</div>
+    <div style="margin-bottom: 12px;">
+        <label>
+            <input type="radio" name="dateMode" value="single" checked onchange="toggleDateMode()"> Single
+        </label>
+        <label style="margin-left: 16px;">
+            <input type="radio" name="dateMode" value="range" onchange="toggleDateMode()"> Range
+        </label>
+        <label style="margin-left: 16px;">
+            <input type="radio" name="dateMode" value="all" onchange="toggleDateMode()"> Export All
+        </label>
+    </div>
+    <div id="singleDatePicker">
+        <input type="date" id="dateInput">
+        <div class="calendar-container" id="calendarContainer">
+            <div class="calendar-header">
+                <button onclick="changeMonth(-1)">Prev</button>
+                <span class="calendar-month" id="calendarMonth"></span>
+                <button onclick="changeMonth(1)">Next</button>
             </div>
-        </div>
-        <div id="rangeDatePicker" style="display: none;">
-            <input type="date" id="startDate"> to <input type="date" id="endDate">
-        </div>
-        <div id="allDatesInfo" style="display: none; color: #999; font-size: 14px;">
-            One file per date will be generated
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-stats" id="calendarStats"></div>
         </div>
     </div>
+    <div id="rangeDatePicker" style="display: none;">
+        <div style="margin-bottom: 12px;">
+            <label>
+                <input type="radio" name="rangeExportMode" value="separate" checked> Separate files
+            </label>
+            <label style="margin-left: 16px;">
+                <input type="radio" name="rangeExportMode" value="single"> Single file
+            </label>
+        </div>
+        <input type="date" id="startDate"> to <input type="date" id="endDate">
+    </div>
+    <div id="allDatesInfo" style="display: none;">
+        <div style="margin-bottom: 12px;">
+            <label>
+                <input type="radio" name="allExportMode" value="separate" checked> Separate files
+            </label>
+            <label style="margin-left: 16px;">
+                <input type="radio" name="allExportMode" value="single"> Single file
+            </label>
+        </div>
+    </div>
+</div>
 
     <div class="step">
         <div class="step-title">4. Content</div>

@@ -247,9 +247,11 @@ function exportSingleDate(data, platform, senderFilter, format, status) {
 }
 
 // Date range export
+// Date range export
 function exportDateRange(data, platform, senderFilter, format, status) {
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
+    const exportMode = document.querySelector('input[name="rangeExportMode"]:checked').value;
     
     if (!startDate || !endDate) {
         status.textContent = 'Please select start and end dates';
@@ -263,7 +265,7 @@ function exportDateRange(data, platform, senderFilter, format, status) {
         return;
     }
     
-    const datesInRange = Array.from(availableDates).filter(date => date >= startDate && date <= endDate);
+    const datesInRange = Array.from(availableDates).filter(date => date >= startDate && date <= endDate).sort();
     
     if (datesInRange.length === 0) {
         status.textContent = 'No conversations found in this date range';
@@ -271,56 +273,119 @@ function exportDateRange(data, platform, senderFilter, format, status) {
         return;
     }
     
-    let exportedCount = 0;
-    
-    for (const date of datesInRange) {
-        let result;
-        if (platform === 'claude') {
-            result = processClaudeData(data, date, senderFilter);
-        } else if (platform === 'chatgpt') {
-            result = processChatGPTData(data, date, senderFilter);
-        } else if (platform === 'grok') {
-            result = processGrokData(data, date, senderFilter);
+    if (exportMode === 'single') {
+        // Export all to single file
+        let allContent = [];
+        
+        for (const date of datesInRange) {
+            let result;
+            if (platform === 'claude') {
+                result = processClaudeData(data, date, senderFilter);
+            } else if (platform === 'chatgpt') {
+                result = processChatGPTData(data, date, senderFilter);
+            } else if (platform === 'grok') {
+                result = processGrokData(data, date, senderFilter);
+            }
+            
+            if (result.length > 0) {
+                allContent.push(result);
+            }
         }
         
-        if (result.length > 0) {
-            downloadFile(result, date, platform, senderFilter, format);
-            exportedCount++;
+        if (allContent.length > 0) {
+            const combined = allContent.join('\n\n');
+            downloadFile(combined, `${startDate}_to_${endDate}`, platform, senderFilter, format);
+            status.textContent = 'Export successful!';
+            status.style.color = '#000';
         }
+    } else {
+        // Export separate files
+        let exportedCount = 0;
+        
+        for (const date of datesInRange) {
+            let result;
+            if (platform === 'claude') {
+                result = processClaudeData(data, date, senderFilter);
+            } else if (platform === 'chatgpt') {
+                result = processChatGPTData(data, date, senderFilter);
+            } else if (platform === 'grok') {
+                result = processGrokData(data, date, senderFilter);
+            }
+            
+            if (result.length > 0) {
+                downloadFile(result, date, platform, senderFilter, format);
+                exportedCount++;
+            }
+        }
+        
+        status.textContent = `Export successful! ${exportedCount} files`;
+        status.style.color = '#000';
     }
-    
-    status.textContent = `Export successful! ${exportedCount} files`;
-    status.style.color = '#000';
 }
 
 // Export all dates
+// Export all dates
 function exportAllDates(data, platform, senderFilter, format, status) {
+    const exportMode = document.querySelector('input[name="allExportMode"]:checked').value;
+    
     if (availableDates.size === 0) {
         status.textContent = 'No conversations found';
         status.style.color = '#999';
         return;
     }
     
-    let exportedCount = 0;
+    const sortedDates = Array.from(availableDates).sort();
     
-    for (const date of availableDates) {
-        let result;
-        if (platform === 'claude') {
-            result = processClaudeData(data, date, senderFilter);
-        } else if (platform === 'chatgpt') {
-            result = processChatGPTData(data, date, senderFilter);
-        } else if (platform === 'grok') {
-            result = processGrokData(data, date, senderFilter);
+    if (exportMode === 'single') {
+        // Export all to single file
+        let allContent = [];
+        
+        for (const date of sortedDates) {
+            let result;
+            if (platform === 'claude') {
+                result = processClaudeData(data, date, senderFilter);
+            } else if (platform === 'chatgpt') {
+                result = processChatGPTData(data, date, senderFilter);
+            } else if (platform === 'grok') {
+                result = processGrokData(data, date, senderFilter);
+            }
+            
+            if (result.length > 0) {
+                allContent.push(result);
+            }
         }
         
-        if (result.length > 0) {
-            downloadFile(result, date, platform, senderFilter, format);
-            exportedCount++;
+        if (allContent.length > 0) {
+            const combined = allContent.join('\n\n');
+            const firstDate = sortedDates[0];
+            const lastDate = sortedDates[sortedDates.length - 1];
+            downloadFile(combined, `${firstDate}_to_${lastDate}`, platform, senderFilter, format);
+            status.textContent = 'Export successful!';
+            status.style.color = '#000';
         }
+    } else {
+        // Export separate files
+        let exportedCount = 0;
+        
+        for (const date of sortedDates) {
+            let result;
+            if (platform === 'claude') {
+                result = processClaudeData(data, date, senderFilter);
+            } else if (platform === 'chatgpt') {
+                result = processChatGPTData(data, date, senderFilter);
+            } else if (platform === 'grok') {
+                result = processGrokData(data, date, senderFilter);
+            }
+            
+            if (result.length > 0) {
+                downloadFile(result, date, platform, senderFilter, format);
+                exportedCount++;
+            }
+        }
+        
+        status.textContent = `Export successful! ${exportedCount} files`;
+        status.style.color = '#000';
     }
-    
-    status.textContent = `Export successful! ${exportedCount} files`;
-    status.style.color = '#000';
 }
 
 // ========== Claude Parser ==========
